@@ -5,7 +5,13 @@ import 'rc-time-picker/assets/index.css';
 import './components.css'
 import shortid from 'shortid';
 
-import { SeriesStore, existy, ua_day, DayScheduleStore, schedule } from '../stores/ScheduleStore'
+import { 
+  SeriesStore, 
+  existy, ua_day, 
+  DayScheduleStore,
+  dateToString, 
+  schedule } 
+from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
 
 const types = [
@@ -173,42 +179,60 @@ class Block extends Component {
 }
 const DaySchedule = (props) => {
   return (
-    <table><tbody>
-      <tr><td>111</td></tr>
-      {/* {props.blocks.map(block =>{
-
-      }) */}
-    </tbody></table>
+    <div>
+      <div>
+        {props.day} {props.date}
+      </div>
+      <div>
+        <table><tbody>   
+          {props.blocks.map(block=>
+            <tr key={uid()}><td>
+              <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} />
+            </td></tr>
+            )}
+        </tbody></table>   
+      </div>
+    </div>
   )
 }
 
 class Schedule extends Component {
   constructor(props) {
     super(props);
-    this.state = { schedule: schedule }
+    const today = new Date();
+    this.state = { week_date: dateToString(today) };
+  }
 
+  changeWeekDate = (e) =>{
+    this.setState({ week_date: e.target.value });
   }
 
   render() {
+    // console.log(dateToString(this.state.week_date));
     return (
       <>
-        {this.state.schedule.map(date_row =>
-          <Row key={date_row[0]}>
-            <Col>
-              <input type="date" defaultValue={date_row[0]} readOnly />
-            </Col>
-            <Col>
-              <Block
-                key={date_row[1][0][0]}
-                block_id={date_row[1][0][0]}
-                start_time={date_row[1][0][1]}
-                stop_time={date_row[1][0][2]}
-              // schedule={this.state.schedule.schedule}
-              />
-            </Col>
-          </Row>
-
-        )}
+        {
+          <input 
+            type="date" 
+            value={this.state.week_date} 
+            onChange={this.changeWeekDate} 
+            />
+        }
+        <table>
+          <tbody>
+            {this.props.day_schedules.map(day_schedule=>
+              <tr>
+                <td>
+                  <DaySchedule 
+                    date={day_schedule[0]} 
+                    day={ua_day(new Date(day_schedule[0]))}
+                    blocks={day_schedule[1]}
+                    />
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </>
     );
   }
