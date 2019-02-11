@@ -139,6 +139,13 @@ class Schedule extends Component {
     this.setState({ week_date: e.target.value });
   }
 
+  removeSchedule = (idx) => (e) => {
+    const sc = this.state.schedule;
+    this.setState({schedule: sc.filter((_,i)=>i!==idx)//slice(0,idx+1).concat([sc[idx][0],[]],sc.slice[idx+1]) 
+    });//
+    // e.target.value="+";
+  }
+
   render() {
     // console.log(dateToString(this.state.week_date));
     return (
@@ -152,8 +159,15 @@ class Schedule extends Component {
         }
         <table>
           <tbody>
-            {this.state.schedule.map(day_schedule=>
-              <tr>
+            {this.state.schedule.map((day_schedule,idx)=>          
+              <tr key={uid()}>
+                <td>
+                  <button 
+                    onClick={this.removeSchedule}
+                    >
+                   -
+                  </button> 
+                </td>
                 <td>
                   <DaySchedule 
                     date={day_schedule[0]}                    

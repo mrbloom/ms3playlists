@@ -72,6 +72,7 @@ class App extends Component {
     return (
 
       <Container>
+        <Schedule />
         <Sery sery="Помста1" types={types} first={1} last={2} series_names={series_names} type="УКР." />
 
         <Series series={[["Вечірка", 1, 12, "Розваж."], ["Вечірка", 11, 13, "УКР."]]} />
@@ -86,7 +87,7 @@ class App extends Component {
           ]
         } />
 
-        <Schedule />
+
 {/* 
         <Schedule day_schedules={
           [
