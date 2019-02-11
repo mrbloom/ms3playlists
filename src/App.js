@@ -12,7 +12,10 @@ import {
   schedule,
   dateToString,
   init_schedule,
-  dateToBlockid, SeriesStore, DayScheduleStore,
+  get_week_dates,
+  dateToBlockid, 
+  SeriesStore, 
+  DayScheduleStore,
   Week,
   types,
   series_names,
@@ -31,20 +34,28 @@ function zip() {
 
 const today_week_dates = (new Week()).dates;
 
+const k=[
+  ["2019-01-01",
+      [
+          ["01010001", "07:00", "11:00",
+              [
+                  ["Помста1", 1, 1, "Розваж."],
+                  ["Помста2", 2, 5, "Розваж."],
+              ]
+          ]
+      ]
+  ],
+]
+
 class App extends Component {
   constructor(props) {
     super(props);
+    const today = new Date();
     this.state = {
-      date: dateToString(new Date()),
+      date: dateToString(today),
       schedule: schedule,
-      // dates: today_week_dates,
-      // seriesStores: today_week_dates.map(date => new SeriesStore({ date })),
+      week_dates: get_week_dates(today)
     };
-    // 
-    // this.state = {
-    //   schedule: schedule
-    // }
-    // const s = new ScheduleStore();
   }
 
   changeWeekDate = (e) => {
@@ -55,19 +66,9 @@ class App extends Component {
       schedule: schedule,
       date: new_date
     });
-    console.log(schedule);
-    // alert(e.target.value);
-    // schedule.changeDate(new Date(new_date));
-    // this.setState({ schedule: schedule });
   }
 
   render() {
-    // const seore = new SeriesStore({ series: [["Вечірка", 1, 1, "Розваж."], ["Вечірка", 1, 3, "УКР."]] });
-    // const def_srs = [
-    //   new SeriesStore({ series: [["Вечірка", 1, 1, "Розваж."], ["Вечірка", 1, 3, "УКР."]] }),
-    //   new SeriesStore({ series: [["Вечірка", 1, 1, "Розваж."], ["Вечірка", 1, 3, "УКР."]] })
-    // ];
-    // const sc = new DayScheduleStore();
     return (
 
       <Container>
@@ -85,62 +86,26 @@ class App extends Component {
           ]
         } />
 
+        <Schedule />
+{/* 
         <Schedule day_schedules={
           [
-          ["2019-08-02",
-            [
-              ["08020001","20:00","21:00",[["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-              ["08020002","22:00","23:00",[["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-              ["08020003","23:00","03:00",[["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+            ["2019-08-02",
+              [
+                ["08020001","20:00","21:00",[["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+                ["08020002","22:00","23:00",[["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+                ["08020003","23:00","03:00",[["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+              ]
+            ],
+            ["2019-08-03",
+              [
+                ["08030001","20:00","21:00",[["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+                ["08030002","22:00","23:00",[["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+                ["08030003","23:00","03:00",[["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+              ]
             ]
-          ],
-          ["2019-08-03",
-            [
-              ["08030001","20:00","21:00",[["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-              ["08030002","22:00","23:00",[["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-              ["08030003","23:00","03:00",[["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-            ]
-          ]
-        ]
-        }
-        />
-        {/* <Row>
-          <input
-            type="date"
-            value={this.state.date}
-            onChange={this.changeWeekDate}
-          />
-        </Row>
-
-        <Schedule key={this.state.date} schedule={this.state.schedule} /> */}
-        {/* <Series series={[["Вечірка", 1, 1, "Розваж."], ["Вечірка", 1, 3, "УКР."]]} start_time="08:00" /> */}
-        {/* {this.state.seriesStores.map(seriesStore => <DaySchedule date={seriesStore.date} />)} */}
-        {/* <Series /> */}
-        {/* <Series series={{ series: [["Вечірка", 1, 1, "Розваж."], ["Вечірка", 1, 3, "УКР."]] }} /> */}
-        {/* <Series series={def_srs} /> */}
-
-        {/* <Series /> */}
-
-        {/* <Content block_id="01010001" /> */}
-        {/* <Row>
-          <Col>
-            <DayDate
-              value={schedule.monday_date}
-              editable={true}
-              onChange={this.changeWeekDate}
-            />
-          </Col>
-        </Row>
-
-        {schedule.days.map((day, i) =>
-          <Row>
-            <Col>
-              <label>{day}<input type="date" value={schedule.dates[i]} readOnly /></label>
-            </Col>
-            <Block block_id={dateToBlockid(schedule.dates[i])} start_time="07:00" stop_time="11:00" schedule={schedule} />
-
-          </Row>
-        )} */}
+          ] 
+        } />*/}
       </Container >
     );
   }

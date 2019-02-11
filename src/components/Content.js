@@ -10,6 +10,7 @@ import {
   existy, ua_day, 
   DayScheduleStore,
   dateToString, 
+  get_week_dates,
   schedule } 
 from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
@@ -30,84 +31,6 @@ const series_names = [
 ];
 
 const uid = () => shortid.generate();
-// const default_series = [["Помста1", 1, 2], ["Помста2", 1, 2]];
-
-// class Content extends Component {
-//   constructor(props) {
-//     super(props);
-
-//     this.state = { series: default_series };
-//   }
-
-//   addDefaultSeries = () => {
-//     const el = (this.default_series)
-//     this.setState({ series: this.state.series.concat(el) })
-//   }
-
-
-//   render() {
-//     const { block_id, schedule } = this.props;
-//     const { series } = this.state;
-//     const contents = schedule ? schedule.getContents(block_id) : default_series;
-
-
-//     return (
-//       <>
-//         {contents.map((content, idx) => {
-//           const [series_name, first, last] = content;
-//           return (
-//             <Row key={idx}>
-//               <Series series_names={series_names} series_name={series_name} first={first} last={last} block_id={block_id} schedule={schedule} type={default_type} />
-//             </Row>
-//           )
-//         })}
-//         <Row>
-//           <button
-//             onClick={this.addDefaultSeries}
-//           >+</button>
-//           <button
-//             onClick={
-//               () => {
-//                 this.setState({ series: series.slice(0, -1) })
-//                 // this.setState({ series_num: series_num - 1 })
-//               }
-//             }
-//           >-</button>
-//         </Row>
-//       </>
-//     );
-//   }
-// }
-
-// class Series extends Component {
-//   render() {
-//     const { series } = this.props.series;
-//     return (
-//       <>
-//         {series.map((sery, idx) = {
-//           return(
-//           <div>
-//           <select name="type_name" value={sery}>
-//           </div>
-//         );
-//         }}
-
-//         <select name="type_name" value={type}>
-//           {types.map((type) =>
-//             <option value={type}>{type}</option>
-//           )}
-//         </select>
-//         <select name="series_name" value={series_name}>
-//           {series_names.map(name =>
-//             <option value={name}>{name}</option>
-//           )}
-//         </select>
-//         <input type="number" min="1" value={first} />
-//         <input type="number" min="1" value={last} />
-//       </>
-//     );
-//   }
-// }
 
 class Sery extends Component {
 
@@ -181,7 +104,7 @@ const DaySchedule = (props) => {
   return (
     <div>
       <div>
-        {props.day} {props.date}
+        {ua_day(new Date(props.date))} {props.date}
       </div>
       <div>
         <table><tbody>   
@@ -200,7 +123,16 @@ class Schedule extends Component {
   constructor(props) {
     super(props);
     const today = new Date();
-    this.state = { week_date: dateToString(today) };
+    this.state = { 
+      week_date: dateToString(today),
+      schedule: get_week_dates(today).map(date=>
+        [dateToString(date),[
+          ["08020001","20:00","21:00",[["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+          ["08020002","22:00","23:00",[["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+          ["08020003","23:00","03:00",[["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+        ]]
+        ),
+    };
   }
 
   changeWeekDate = (e) =>{
@@ -220,12 +152,11 @@ class Schedule extends Component {
         }
         <table>
           <tbody>
-            {this.props.day_schedules.map(day_schedule=>
+            {this.state.schedule.map(day_schedule=>
               <tr>
                 <td>
                   <DaySchedule 
-                    date={day_schedule[0]} 
-                    day={ua_day(new Date(day_schedule[0]))}
+                    date={day_schedule[0]}                    
                     blocks={day_schedule[1]}
                     />
                 </td>
