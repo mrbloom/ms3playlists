@@ -5,14 +5,15 @@ import 'rc-time-picker/assets/index.css';
 import './components.css'
 import shortid from 'shortid';
 
-import { 
-  SeriesStore, 
-  existy, ua_day, 
+import {
+  SeriesStore,
+  existy, ua_day,
   DayScheduleStore,
-  dateToString, 
+  dateToString,
   get_week_dates,
-  schedule } 
-from '../stores/ScheduleStore'
+  schedule
+}
+  from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
 
 const types = [
@@ -107,13 +108,13 @@ const DaySchedule = (props) => {
         {ua_day(new Date(props.date))} {props.date}
       </div>
       <div>
-        <table><tbody>   
-          {props.blocks.map(block=>
+        <table><tbody>
+          {props.blocks.map(block =>
             <tr key={uid()}><td>
               <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} />
             </td></tr>
-            )}
-        </tbody></table>   
+          )}
+        </tbody></table>
       </div>
     </div>
   )
@@ -123,56 +124,64 @@ class Schedule extends Component {
   constructor(props) {
     super(props);
     const today = new Date();
-    this.state = { 
+    const init_schedule = get_week_dates(today).map(date =>
+      [dateToString(date), [
+        ["08020001", "20:00", "21:00", [["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+        ["08020002", "22:00", "23:00", [["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+        ["08020003", "23:00", "03:00", [["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+      ]],
+    );
+    this.state = {
       week_date: dateToString(today),
-      schedule: get_week_dates(today).map(date=>
-        [dateToString(date),[
-          ["08020001","20:00","21:00",[["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-          ["08020002","22:00","23:00",[["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-          ["08020003","23:00","03:00",[["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-        ]]
-        ),
+      schedule: init_schedule,
     };
+    this.prev_schedules = [init_schedule];
   }
 
-  changeWeekDate = (e) =>{
+  changeWeekDate = (e) => {
     this.setState({ week_date: e.target.value });
   }
 
   removeSchedule = (idx) => (e) => {
     const sc = this.state.schedule;
-    this.setState({schedule: sc.filter((_,i)=>i!==idx)//slice(0,idx+1).concat([sc[idx][0],[]],sc.slice[idx+1]) 
+    this.prev_schedules.push(sc);
+    this.setState({
+      schedule: sc.filter((_, i) => i !== idx)//slice(0,idx+1).concat([sc[idx][0],[]],sc.slice[idx+1]) 
     });//
-    // e.target.value="+";
+  }
+
+  undoScedule = () => {
+    this.setState({ schedule: this.prev_schedules.pop() });
   }
 
   render() {
     // console.log(dateToString(this.state.week_date));
     return (
       <>
-        {
-          <input 
-            type="date" 
-            value={this.state.week_date} 
-            onChange={this.changeWeekDate} 
-            />
-        }
+
+        <input
+          type="date"
+          value={this.state.week_date}
+          onChange={this.changeWeekDate}
+        />
+        <button onClick={this.undoScedule}>Undo Schedule</button>
+
         <table>
           <tbody>
-            {this.state.schedule.map((day_schedule,idx)=>          
+            {this.state.schedule.map((day_schedule, idx) =>
               <tr key={uid()}>
                 <td>
-                  <button 
-                    onClick={this.removeSchedule}
-                    >
-                   -
-                  </button> 
+                  <button
+                    onClick={this.removeSchedule(idx)}
+                  >
+                    -
+                  </button>
                 </td>
                 <td>
-                  <DaySchedule 
-                    date={day_schedule[0]}                    
+                  <DaySchedule
+                    date={day_schedule[0]}
                     blocks={day_schedule[1]}
-                    />
+                  />
                 </td>
               </tr>
             )}
