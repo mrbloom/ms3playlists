@@ -110,9 +110,14 @@ const DaySchedule = (props) => {
       <div>
         <table><tbody>
           {props.blocks.map(block =>
-            <tr key={uid()}><td>
-              <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} />
-            </td></tr>
+            <tr key={uid()}>
+              <td>
+                <button>+</button>
+              </td>
+              <td>
+                <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} />
+              </td>
+            </tr>
           )}
         </tbody></table>
       </div>
@@ -151,7 +156,8 @@ class Schedule extends Component {
   }
 
   undoScedule = () => {
-    this.setState({ schedule: this.prev_schedules.pop() });
+    if (this.prev_schedules.length > 0)
+      this.setState({ schedule: this.prev_schedules.pop() });
   }
 
   render() {
