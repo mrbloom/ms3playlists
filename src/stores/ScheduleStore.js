@@ -65,9 +65,13 @@ let schedule = [
             ],
         ]
     ]
-]
+];
+
+const default_sery = ["Помста2", 2, 5, "Розваж."];
+
 const dateToString = (date) => date.toISOString().slice(0, 10);
 const datestrToBlockId = (str, i) => str.slice(5, 7) + str.slice(8, 10) + i.toString().padStart(4, "0");
+const dateToBlockId = (date, i) => datestrToBlockId(dateToString(date));
 const init_schedule = (date) => schedule = (get_week_dates(new Date(date))).map(date => [dateToString(date), []]);
 const add_day = (date) => schedule.push([date.dateToString(), [[[]]]]);
 const add_block = (date_str, start = "07:00", stop = "11:00") => {
@@ -92,27 +96,27 @@ const add_sery = (sery, date_str, block_id) => {
     })
 }
 
-console.log("AUE");
-init_schedule("2019-02-07")
-schedule.forEach(row => add_block(row[0]));
-schedule.forEach(row => {
-    console.log("ddddd===", row[0], dateToBlockid(row[0]));
-    add_sery(["Помста1", 12, 15, "Розваж."], row[0], dateToBlockid(row[0]))
-    console.log("---")
-});
+// console.log("AUE");
+// init_schedule("2019-02-07")
+// schedule.forEach(row => add_block(row[0]));
+// schedule.forEach(row => {
+//     console.log("ddddd===", row[0], dateToBlockid(row[0]));
+//     add_sery(["Помста1", 12, 15, "Розваж."], row[0], dateToBlockid(row[0]))
+//     console.log("---")
+// });
 // add_block("2019-02-07");
 // add_sery(["Помста1", 12, 15, "Розваж."], "2019-02-07", "02070001");
 
-console.log(schedule);
-console.log("AUE");
+// console.log(schedule);
+// console.log("AUE");
 
 
-function dateToBlockid(date = new Date(), suffix = "0001") {
-    if (date instanceof Date)
-        return date.toISOString().slice(5, 7) + date.toISOString().slice(8, 10) + suffix
-    if (typeof date == "string")
-        return date.slice(5, 7) + date.slice(8, 10) + suffix
-}
+// function dateToBlockid(date = new Date(), suffix = "0001") {
+//     if (date instanceof Date)
+//         return date.toISOString().slice(5, 7) + date.toISOString().slice(8, 10) + suffix
+//     if (typeof date == "string")
+//         return date.slice(5, 7) + date.slice(8, 10) + suffix
+// }
 
 
 
@@ -134,13 +138,13 @@ class SeriesStore {
     default_sery = ["Помста1", 1, 1, "Розваж."];
     // default_content = [["Помста1", 1, 1, "Розваж."]];
 
-    default_init = {
-        series: [["Помста1", 1, 1, "Розваж."]],
-        date: new Date(),
-        block_id: dateToBlockid(),
-        start_time: "07:00",
-        stop_time: "11:00"
-    }
+    // default_init = {
+    //     series: [["Помста1", 1, 1, "Розваж."]],
+    //     date: new Date(),
+    //     block_id: dateToBlockId(new Date(),1,
+    //     start_time: "07:00",
+    //     stop_time: "11:00"
+    // }
 
     constructor(props = {}) {
         props = { ...this.default_init, ...props };
@@ -198,7 +202,7 @@ class DayScheduleStore {
         this.day_schedule = props.day_schedule;
     }
 
-    new_seriesStore = (date = new Date(), suffix = "0001") => new SeriesStore({ series: this.default_series, block_id: dateToBlockid(date, suffix) });
+    new_seriesStore = (date = new Date(), i = 1) => new SeriesStore({ series: this.default_series, block_id: dateToBlockId(date, i) });
 
     add_block() {
         const suffix = (this.day_schedule.length + 1).toString().padStart(4, "0");
@@ -243,7 +247,9 @@ function dateAdd(date, interval, units) {
 
 
 export {
-    dateToBlockid, SeriesStore, existy, DayScheduleStore,
+    datestrToBlockId,
+    dateToBlockId,
+    SeriesStore, existy, DayScheduleStore,
     ua_day,
     Week,
     schedule,
@@ -252,6 +258,7 @@ export {
     types,
     series_names,
     get_week_dates,
+    default_sery,
 };
 
 

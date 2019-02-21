@@ -8,10 +8,12 @@ import shortid from 'shortid';
 import {
   SeriesStore,
   existy, ua_day,
-  DayScheduleStore,
   dateToString,
+  datestrToBlockId,
+  dateToBlockId,
   get_week_dates,
-  schedule
+  schedule,
+  default_sery,
 }
   from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
@@ -62,6 +64,7 @@ class Sery extends Component {
             <td>
               <input className="number" min="1" name={"last_" + idx} type="number" defaultValue={last} />
             </td>
+            <td><button>-</button></td>
           </tr>
         </tbody>
       </table>
@@ -80,6 +83,11 @@ const Series = props =>
           </td>
         </tr>
       )}
+      <tr>
+        <td>
+          <button>+</button>
+        </td>
+      </tr>
     </tbody></table>
   </>
 
@@ -88,16 +96,14 @@ class Block extends Component {
   render() {
     const { block_id, start_time, stop_time, series } = this.props;
     return (
-      <form onChange={this.change}>
-        <table><tbody>
-          <tr>
-            <td>{block_id}</td>
-            <td><input type="time" className="time" name="start_time" defaultValue={start_time} /></td>
-            <td><input type="time" className="time" name="start_time" defaultValue={stop_time} /></td>
-            <td><Series series={series} /></td>
-          </tr>
-        </tbody></table>
-      </form>
+      <table><tbody>
+        <tr>
+          <td>{block_id}</td>
+          <td><input type="time" className="time" name={`${block_id}_start_time`} defaultValue={start_time} /></td>
+          <td><input type="time" className="time" name={`${block_id}_stop_time`} defaultValue={stop_time} /></td>
+          <td><Series series={series} /></td>
+        </tr>
+      </tbody></table>
     );
   }
 }
@@ -112,13 +118,22 @@ const DaySchedule = (props) => {
           {props.blocks.map(block =>
             <tr key={uid()}>
               <td>
-                <button>+</button>
+                <button
+                  onClick={() => props.removeBlock(block[0])}
+                >-</button>
               </td>
               <td>
                 <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} />
               </td>
             </tr>
           )}
+          <tr>
+            <td>
+              <button
+                onClick={() => props.addBlock(props.date)}
+              >+</button>
+            </td>
+          </tr>
         </tbody></table>
       </div>
     </div>
@@ -131,9 +146,9 @@ class Schedule extends Component {
     const today = new Date();
     const init_schedule = get_week_dates(today).map(date =>
       [dateToString(date), [
-        ["08020001", "20:00", "21:00", [["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-        ["08020002", "22:00", "23:00", [["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-        ["08020003", "23:00", "03:00", [["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+        [datestrToBlockId(dateToString(date), 1), "20:00", "21:00", [["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+        [datestrToBlockId(dateToString(date), 2), "22:00", "23:00", [["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+        [datestrToBlockId(dateToString(date), 3), "23:00", "03:00", [["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
       ]],
     );
     this.state = {
@@ -155,9 +170,37 @@ class Schedule extends Component {
     });//
   }
 
+  removeBlock = (block_id) => {
+    const sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    this.setState({
+      schedule: sc.map(([date, blocks]) => [date, blocks.filter(block => {
+        // console.log("bl", block, block_id !== block);
+        return block_id !== block[0]
+      })])
+    })
+    console.log(this.prev_schedules);
+  }
+
+  addBlock = (date, start = "20:00", stop = "06:00", series = [default_sery]) => {
+    const sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    sc.forEach(([dt, blocks]) => {
+      if (dt === date) {
+        const len = blocks.length;
+        blocks.push([datestrToBlockId(date, len + 1), start, stop, series]);
+      }
+    });
+    this.setState({ schedule: sc });
+
+  }
+
   undoScedule = () => {
-    if (this.prev_schedules.length > 0)
-      this.setState({ schedule: this.prev_schedules.pop() });
+    if (this.prev_schedules.length > 0) {
+      const prev_sc = this.prev_schedules.pop();
+      console.log("UNDO", prev_sc);
+      this.setState({ schedule: prev_sc });
+    }
   }
 
   render() {
@@ -187,6 +230,8 @@ class Schedule extends Component {
                   <DaySchedule
                     date={day_schedule[0]}
                     blocks={day_schedule[1]}
+                    removeBlock={this.removeBlock}
+                    addBlock={this.addBlock}
                   />
                 </td>
               </tr>
