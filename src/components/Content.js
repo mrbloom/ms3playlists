@@ -38,7 +38,7 @@ const uid = () => shortid.generate();
 class Sery extends Component {
 
   render() {
-    const { idx, type, types, sery_name, series_names, first, last } = this.props;
+    const { idx, type, types, sery_name, series_names, first, last, removeSery, block_id } = this.props;
     return (
 
       <table>
@@ -64,7 +64,7 @@ class Sery extends Component {
             <td>
               <input className="number" min="1" name={"last_" + idx} type="number" defaultValue={last} />
             </td>
-            <td><button>-</button></td>
+            <td><button onClick={removeSery(block_id, idx)}>-</button></td>
           </tr>
         </tbody>
       </table>
@@ -79,7 +79,16 @@ const Series = props =>
       {props.series.map((sery, idx) =>
         <tr key={uid()}>
           <td>
-            <Sery idx={idx} sery_name={sery[0]} types={types} first={sery[1]} last={sery[2]} series_names={series_names} type={sery[3]} />
+            <Sery  
+              block_id={props.block_id} 
+              idx={idx} sery_name={sery[0]} 
+              types={types} first={sery[1]} 
+              last={sery[2]} 
+              series_names={series_names} 
+              type={sery[3]}
+              removeSery={props.removeSery}
+               
+             />
           </td>
         </tr>
       )}
@@ -94,14 +103,14 @@ const Series = props =>
 class Block extends Component {
   change = (e) => console.log(e.target.name, '=', e.target.value)
   render() {
-    const { block_id, start_time, stop_time, series } = this.props;
+    const { block_id, start_time, stop_time, series, removeSery } = this.props;
     return (
       <table><tbody>
         <tr>
           <td>{block_id}</td>
           <td><input type="time" className="time" name={`${block_id}_start_time`} defaultValue={start_time} /></td>
           <td><input type="time" className="time" name={`${block_id}_stop_time`} defaultValue={stop_time} /></td>
-          <td><Series series={series} /></td>
+          <td><Series series={series} block_id={block_id} removeSery={removeSery}/></td>
         </tr>
       </tbody></table>
     );
@@ -123,7 +132,7 @@ const DaySchedule = (props) => {
                 >-</button>
               </td>
               <td>
-                <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} />
+                <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} removeSery={props.removeSery}/>
               </td>
             </tr>
           )}
@@ -170,6 +179,28 @@ class Schedule extends Component {
     });//
   }
 
+  removeSery=(block_id,idx)=>(e)=>{
+    console.log("rem ser");
+    const sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    this.setState({
+      schedule: 
+      sc.map(([date, blocks])=>[
+        date,
+        blocks.map(([b_id, start, stop,series])=>{
+          if (b_id===block_id){
+            console.log(b_id);
+            // console.log(sc)
+            return [b_id, start, stop, series.filter((_,i)=>i!==idx)];
+            console.log(sc);
+          }else{
+            return [b_id,start,stop,series];
+          }
+        })
+      ])
+    });   
+  }
+
   removeBlock = (block_id) => {
     const sc = this.state.schedule;
     this.prev_schedules.push(sc);
@@ -182,6 +213,10 @@ class Schedule extends Component {
     console.log(this.prev_schedules);
   }
 
+  addSery = (block_id, sery) =>{
+    
+  }
+
   addBlock = (date, start = "20:00", stop = "06:00", series = [default_sery]) => {
     const sc = this.state.schedule;
     this.prev_schedules.push(sc);
@@ -192,7 +227,6 @@ class Schedule extends Component {
       }
     });
     this.setState({ schedule: sc });
-
   }
 
   undoScedule = () => {
@@ -232,6 +266,7 @@ class Schedule extends Component {
                     blocks={day_schedule[1]}
                     removeBlock={this.removeBlock}
                     addBlock={this.addBlock}
+                    removeSery={this.removeSery}
                   />
                 </td>
               </tr>
