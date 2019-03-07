@@ -69,6 +69,9 @@ let schedule = [
 
 const default_sery = ["Помста2", 2, 5, "Розваж."];
 
+const change_field = (schedule, cords, val) => {
+
+}
 const dateToString = (date) => date.toISOString().slice(0, 10);
 const datestrToBlockId = (str, i) => str.slice(5, 7) + str.slice(8, 10) + i.toString().padStart(4, "0");
 const dateToBlockId = (date, i) => datestrToBlockId(dateToString(date));

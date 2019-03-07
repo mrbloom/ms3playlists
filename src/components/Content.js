@@ -79,22 +79,23 @@ const Series = props =>
       {props.series.map((sery, idx) =>
         <tr key={uid()}>
           <td>
-            <Sery  
-              block_id={props.block_id} 
-              idx={idx} sery_name={sery[0]} 
-              types={types} first={sery[1]} 
-              last={sery[2]} 
-              series_names={series_names} 
+            <Sery
+              block_id={props.block_id}
+              idx={idx} sery_name={sery[0]}
+              types={types} first={sery[1]}
+              last={sery[2]}
+              series_names={series_names}
               type={sery[3]}
               removeSery={props.removeSery}
-               
-             />
+            // addSery={props.addSery}
+
+            />
           </td>
         </tr>
       )}
       <tr>
         <td>
-          <button>+</button>
+          <button onClick={e => props.addSery(props.block_id)}>+</button>
         </td>
       </tr>
     </tbody></table>
@@ -103,14 +104,14 @@ const Series = props =>
 class Block extends Component {
   change = (e) => console.log(e.target.name, '=', e.target.value)
   render() {
-    const { block_id, start_time, stop_time, series, removeSery } = this.props;
+    const { block_id, start_time, stop_time, series, removeSery, addSery } = this.props;
     return (
       <table><tbody>
         <tr>
           <td>{block_id}</td>
           <td><input type="time" className="time" name={`${block_id}_start_time`} defaultValue={start_time} /></td>
           <td><input type="time" className="time" name={`${block_id}_stop_time`} defaultValue={stop_time} /></td>
-          <td><Series series={series} block_id={block_id} removeSery={removeSery}/></td>
+          <td><Series series={series} block_id={block_id} removeSery={removeSery} addSery={addSery} /></td>
         </tr>
       </tbody></table>
     );
@@ -132,7 +133,7 @@ const DaySchedule = (props) => {
                 >-</button>
               </td>
               <td>
-                <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} removeSery={props.removeSery}/>
+                <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} removeSery={props.removeSery} addSery={props.addSery} />
               </td>
             </tr>
           )}
@@ -179,26 +180,26 @@ class Schedule extends Component {
     });//
   }
 
-  removeSery=(block_id,idx)=>(e)=>{
+  removeSery = (block_id, idx) => (e) => {
     console.log("rem ser");
     const sc = this.state.schedule;
     this.prev_schedules.push(sc);
     this.setState({
-      schedule: 
-      sc.map(([date, blocks])=>[
-        date,
-        blocks.map(([b_id, start, stop,series])=>{
-          if (b_id===block_id){
-            console.log(b_id);
-            // console.log(sc)
-            return [b_id, start, stop, series.filter((_,i)=>i!==idx)];
-            console.log(sc);
-          }else{
-            return [b_id,start,stop,series];
-          }
-        })
-      ])
-    });   
+      schedule:
+        sc.map(([date, blocks]) => [
+          date,
+          blocks.map(([b_id, start, stop, series]) => {
+            if (b_id === block_id) {
+              console.log(b_id);
+              // console.log(sc)
+              return [b_id, start, stop, series.filter((_, i) => i !== idx)];
+              console.log(sc);
+            } else {
+              return [b_id, start, stop, series];
+            }
+          })
+        ])
+    });
   }
 
   removeBlock = (block_id) => {
@@ -213,8 +214,26 @@ class Schedule extends Component {
     console.log(this.prev_schedules);
   }
 
-  addSery = (block_id, sery) =>{
-    
+  addSery = (block_id, sery = default_sery) => {
+    console.log("add sery", block_id);
+    const sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    this.setState({
+      schedule:
+        sc.map(([date, blocks]) => [
+          date,
+          blocks.map(([b_id, start, stop, series]) => {
+            if (b_id === block_id) {
+              console.log(b_id);
+              // console.log(sc)
+              return [b_id, start, stop, [...series, sery]];
+              console.log(sc);
+            } else {
+              return [b_id, start, stop, series];
+            }
+          })
+        ])
+    });
   }
 
   addBlock = (date, start = "20:00", stop = "06:00", series = [default_sery]) => {
@@ -235,6 +254,26 @@ class Schedule extends Component {
       console.log("UNDO", prev_sc);
       this.setState({ schedule: prev_sc });
     }
+  }
+
+  change_time = (block_id, time_idx, value) => {
+    console.log("chng time", block_id, time_idx, value);
+    const sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    this.setState({
+      schedule:
+        sc.map(([date, blocks]) => [
+          date,
+          blocks.map(([b_id, start, stop, series]) => {
+            if (b_id === block_id) {
+              console.log(b_id);
+              return [b_id, value, time_idx === "start" ? value : start, time_idx === "stop" ? value : stop, series];
+            } else {
+              return [b_id, start, stop, series];
+            }
+          })
+        ])
+    });
   }
 
   render() {
@@ -267,6 +306,7 @@ class Schedule extends Component {
                     removeBlock={this.removeBlock}
                     addBlock={this.addBlock}
                     removeSery={this.removeSery}
+                    addSery={this.addSery}
                   />
                 </td>
               </tr>
