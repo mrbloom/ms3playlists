@@ -104,13 +104,25 @@ const Series = props =>
 class Block extends Component {
   change = (e) => console.log(e.target.name, '=', e.target.value)
   render() {
-    const { block_id, start_time, stop_time, series, removeSery, addSery } = this.props;
+    const { block_id, series, removeSery, addSery,changeTime, getTime } = this.props;
+    const start_time = getTime(block_id,"start");
+    const stop_time = getTime(block_id,"stop");
     return (
       <table><tbody>
         <tr>
           <td>{block_id}</td>
-          <td><input type="time" className="time" name={`${block_id}_start_time`} defaultValue={start_time} /></td>
-          <td><input type="time" className="time" name={`${block_id}_stop_time`} defaultValue={stop_time} /></td>
+          <td>
+            <input 
+              type="time" className="time" name={`${block_id}_start_time`} value={start_time}//defaultValue={start_time}
+              onChange={changeTime(block_id,"start")}
+           />
+           </td>
+          <td>
+            <input 
+              type="time" className="time" name={`${block_id}_stop_time`} value={stop_time}//defaultValue={stop_time}
+              onChange={changeTime(block_id,"stop")}
+            />
+            </td>
           <td><Series series={series} block_id={block_id} removeSery={removeSery} addSery={addSery} /></td>
         </tr>
       </tbody></table>
@@ -133,7 +145,16 @@ const DaySchedule = (props) => {
                 >-</button>
               </td>
               <td>
-                <Block block_id={block[0]} start_time={block[1]} stop_time={block[2]} series={block[3]} removeSery={props.removeSery} addSery={props.addSery} />
+                <Block 
+                  block_id={block[0]} 
+                  start_time={block[1]} 
+                  stop_time={block[2]} 
+                  series={block[3]} 
+                  removeSery={props.removeSery} 
+                  addSery={props.addSery}
+                  changeTime={props.changeTime}
+                  getTime={props.getTime}
+                   />
               </td>
             </tr>
           )}
@@ -256,7 +277,29 @@ class Schedule extends Component {
     }
   }
 
-  change_time = (block_id, time_idx, value) => {
+  getTime = (block_id, time_idx) =>{
+    let some_time=null;
+    this.state.schedule.forEach((day_schedule)=>{
+      day_schedule[1].forEach(block=>{
+        const bl_id = block[0];
+        if (bl_id===block_id){
+          if(time_idx==="start"){
+            console.log("start",block[1]);
+            some_time = block[1];
+          }
+          else{
+            some_time = block[2];  
+          } 
+            
+        }
+      })
+    })
+    return some_time;
+  }
+
+  changeTime = (block_id, time_idx) => (e) => {
+    e.preventDefault();
+    const value = e.target.value;
     console.log("chng time", block_id, time_idx, value);
     const sc = this.state.schedule;
     this.prev_schedules.push(sc);
@@ -274,6 +317,7 @@ class Schedule extends Component {
           })
         ])
     });
+    console.log(sc);
   }
 
   render() {
@@ -307,6 +351,8 @@ class Schedule extends Component {
                     addBlock={this.addBlock}
                     removeSery={this.removeSery}
                     addSery={this.addSery}
+                    changeTime={this.changeTime}
+                    getTime={this.getTime}
                   />
                 </td>
               </tr>
@@ -317,148 +363,6 @@ class Schedule extends Component {
     );
   }
 }
-
-// class Block extends Component {
-//   constructor(props) {
-//     super(props);
-//     console.log("constr");
-//     this.state = {
-//       schedule: schedule,
-//       // block_id: props.block_id,
-//       // start_time: props.start_time,
-//       // stop_time: props.stop_time,
-//     };
-//     console.log('end');
-//   }
-//   render() {
-//     // const { block_id, start_time, stop_time } = this.state;
-//     return (
-//       <Row>
-//         <Col><input type="text" defaultValue={this.props.block_id} /></Col>
-//         <Col><input type="time" defaultValue={this.props.start_time} /></Col>
-//         <Col><input type="time" defaultValue={this.props.stop_time} /></Col>
-//       </Row>
-//     );
-//   }
-// }
-
-
-
-
-// class Series extends Component {
-//   constructor(props = {}) {
-//     super(props);
-//     console.log(this.state);
-//     const seriesStore = new SeriesStore(props);
-//     this.state = { seriesStore };
-//     console.log(this.state);
-//   }
-
-//   change = (row_idx, cell_idx) => (e) => {
-//     this.setState({ seriesStore: this.state.seriesStore.setValue(row_idx, cell_idx, e.target.value) });
-//   }
-
-//   push = () => {
-//     console.log("add sery");
-//     this.setState({ seriesStore: this.state.seriesStore.push() });
-//   }
-//   pop = () => this.setState({ seriesStore: this.state.seriesStore.pop() });
-
-//   render() {
-//     const { seriesStore } = this.state;
-//     if (seriesStore === undefined) {
-//       console.log("no props");
-//       return null;
-//     }
-//     const { series, types, series_names, block_id, start_time, stop_time } = seriesStore;
-//     const [NAME, FIRST, LAST, TYPE] = [
-//       seriesStore.series_name_idx,
-//       seriesStore.first_idx,
-//       seriesStore.last_idx,
-//       seriesStore.type_idx,
-//     ]
-//     console.log(this.state.seriesStore.series);
-//     return (
-//       <Row>
-
-//         <Col sm="2">
-//           <label>№ блоку<input type="text" defaultValue={block_id} /></label>
-//         </Col>
-//         <Col sm="1">
-//           <TimePicker
-//             defaultValue={moment(start_time, "HH:mm")}
-//             showSecond={false}
-//             onChange={() => {
-//               // this.forceUpdate();
-//             }}
-//           />
-//         </Col>
-//         <Col sm="1">
-//           <TimePicker
-//             defaultValue={moment(stop_time, "HH:mm")}
-//             showSecond={false}
-//             onChange={() => {
-//               // this.forceUpdate();
-//             }}
-//           />
-//         </Col>
-
-//         <Col>
-//           {series.map((sery, idx) =>
-//             <Row key={idx}>
-
-//               <Col>
-//                 <select
-//                   onChange={this.change(idx, TYPE)}
-//                   value={sery[TYPE]}>
-//                   {types.map((type, idx) =>
-//                     <option key={idx} value={type}>{type}</option>
-//                   )
-//                   }
-//                 </select>
-
-//                 <select
-//                   onChange={this.change(idx, NAME)}
-//                   value={sery[NAME]}>
-//                   {series_names.map((name, idx) =>
-//                     <option key={idx} value={name} >{name}</option>
-//                   )
-//                   }
-//                 </select>
-//                 <input type="number" onChange={this.change(idx, FIRST)} min="1" value={sery[1]} />
-//                 <input type="number" onChange={this.change(idx, LAST)} min="1" value={sery[2]} />
-//               </Col>
-//             </Row>
-//           )
-//           }
-//           <Row>
-//             <Col>
-//               <button onClick={this.push}>+</button>
-//               <button onClick={this.pop}>-</button>
-//             </Col>
-//           </Row>
-//         </Col>
-//       </Row>
-//     );
-//   }
-// }
-
-// const DaySchedule = (props) =>
-//   <>
-//     {props.seriesStores.map(seriesStore =>
-//       <Row>
-//         <Col>
-//           {ua_day(seriesStore.date)}
-//           <input type="date" defaultValue={seriesStore.date.toISOString().slice(0, 10)} readOnly />
-//         </Col>
-//         <Col>
-//           <Series seriesStore={seriesStore} />
-//         </Col>
-//       </Row>
-//     )}
-//   </>
-
-
 
 export {
   DaySchedule,
