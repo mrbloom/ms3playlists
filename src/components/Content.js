@@ -41,28 +41,28 @@ class Sery extends Component {
     const { idx, type, types, sery_name, series_names, first, last, removeSery, block_id } = this.props;
     return (
 
-      <table>
+      <table onChange={(e)=>console.log(e.target.name)}>
         <tbody>
           <tr>
             <td>
-              <select name={`type_${idx}`} defaultValue={type}>
+              <select name={`type_${block_id}_${idx}`} defaultValue={type}>
                 {types.map(type =>
                   <option key={type} value={type}>{type}</option>
                 )}
               </select>
             </td>
             <td>
-              <select name={`sery_name_${idx}`} defaultValue={sery_name}>
+              <select name={`seryName_${block_id}_${idx}`} defaultValue={sery_name}>
                 {series_names.map(sery =>
                   <option key={sery} value={sery}>{sery}</option>
                 )}
               </select>
             </td>
             <td>
-              <input className="number" min="1" name={"first_" + idx} type="number" defaultValue={first} />
+              <input className="number" min="1" name={`first_${block_id}_${idx}`} type="number" defaultValue={first} />
             </td>
             <td>
-              <input className="number" min="1" name={"last_" + idx} type="number" defaultValue={last} />
+              <input className="number" min="1" name={`last_${block_id}_${idx}`} type="number" defaultValue={last} />
             </td>
             <td><button onClick={removeSery(block_id, idx)}>-</button></td>
           </tr>
@@ -201,26 +201,29 @@ class Schedule extends Component {
     });//
   }
 
-  removeSery = (block_id, idx) => (e) => {
-    console.log("rem ser");
+  makeSomethingWithBlock=(block_func)=>{
     const sc = this.state.schedule;
     this.prev_schedules.push(sc);
     this.setState({
       schedule:
         sc.map(([date, blocks]) => [
           date,
-          blocks.map(([b_id, start, stop, series]) => {
-            if (b_id === block_id) {
-              console.log(b_id);
-              // console.log(sc)
-              return [b_id, start, stop, series.filter((_, i) => i !== idx)];
-              console.log(sc);
-            } else {
-              return [b_id, start, stop, series];
-            }
-          })
+          blocks.map(block_func)
         ])
     });
+  }
+
+  removeSery = (block_id, idx) => (e) => {
+    console.log("rem ser");
+    const rem_f = ([b_id, start, stop, series]) => {
+      if (b_id === block_id) {
+        console.log(b_id);
+        return [b_id, start, stop, series.filter((_, i) => i !== idx)];
+      } else {
+        return [b_id, start, stop, series];
+      }
+    }
+    this.makeSomethingWithBlock(rem_f)
   }
 
   removeBlock = (block_id) => {
@@ -237,24 +240,16 @@ class Schedule extends Component {
 
   addSery = (block_id, sery = default_sery) => {
     console.log("add sery", block_id);
-    const sc = this.state.schedule;
-    this.prev_schedules.push(sc);
-    this.setState({
-      schedule:
-        sc.map(([date, blocks]) => [
-          date,
-          blocks.map(([b_id, start, stop, series]) => {
-            if (b_id === block_id) {
-              console.log(b_id);
-              // console.log(sc)
-              return [b_id, start, stop, [...series, sery]];
-              console.log(sc);
-            } else {
-              return [b_id, start, stop, series];
-            }
-          })
-        ])
-    });
+    const add_func = ([b_id, start, stop, series]) => {
+      if (b_id === block_id) {
+        console.log(b_id);
+        // console.log(sc)
+        return [b_id, start, stop, [...series, sery]];
+      } else {
+        return [b_id, start, stop, series];
+      }
+    }
+    this.makeSomethingWithBlock(add_func);
   }
 
   addBlock = (date, start = "20:00", stop = "06:00", series = [default_sery]) => {
@@ -301,23 +296,41 @@ class Schedule extends Component {
     e.preventDefault();
     const value = e.target.value;
     console.log("chng time", block_id, time_idx, value);
-    const sc = this.state.schedule;
-    this.prev_schedules.push(sc);
-    this.setState({
-      schedule:
-        sc.map(([date, blocks]) => [
-          date,
-          blocks.map(([b_id, start, stop, series]) => {
-            if (b_id === block_id) {
-              console.log(b_id);
-              return [b_id, value, time_idx === "start" ? value : start, time_idx === "stop" ? value : stop, series];
-            } else {
-              return [b_id, start, stop, series];
-            }
-          })
-        ])
-    });
-    console.log(sc);
+    const chng_time = ([b_id, start, stop, series]) => {
+      if (b_id === block_id) {
+        console.log( [b_id, value, time_idx === "start" ? value : start, time_idx === "stop" ? value : stop, series]);
+        return [b_id, time_idx === "start" ? value : start, time_idx === "stop" ? value : stop, series];
+      } else {
+        return [b_id, start, stop, series];
+      }
+    };
+    this.makeSomethingWithBlock(chng_time);
+    console.log(this.state.schedule);
+  }
+
+  
+  changeSery = (e)=>{
+    e.preventDefault();
+    const [field,block_id,idx_str] = e.target.name;
+    switch(field){
+      case("type"):
+        ;
+        break;
+      case("seryName"):
+        ;
+        break;
+      case("first"):
+        ;
+        break;
+      case("last"):
+        ;
+        break;
+      default:
+        console.log("unknown change");
+        break;
+    }
+    // const idx = names.su
+
   }
 
   render() {
