@@ -38,14 +38,17 @@ const uid = () => shortid.generate();
 class Sery extends Component {
 
   render() {
-    const { idx, type, types, sery_name, series_names, first, last, removeSery, block_id } = this.props;
+    const { idx, type, types, sery_name, series_names, first, last, removeSery, block_id, changeSery } = this.props;
     return (
 
-      <table onChange={(e)=>console.log(e.target.name)}>
+      <table>
         <tbody>
           <tr>
             <td>
-              <select name={`type_${block_id}_${idx}`} defaultValue={type}>
+              <select
+                onChange={changeSery(block_id,idx)} 
+                name={`type_${block_id}_${idx}`} 
+                defaultValue={type}>
                 {types.map(type =>
                   <option key={type} value={type}>{type}</option>
                 )}
@@ -87,6 +90,7 @@ const Series = props =>
               series_names={series_names}
               type={sery[3]}
               removeSery={props.removeSery}
+              changeSery={props.changeSery}
             // addSery={props.addSery}
 
             />
@@ -104,7 +108,7 @@ const Series = props =>
 class Block extends Component {
   change = (e) => console.log(e.target.name, '=', e.target.value)
   render() {
-    const { block_id, series, removeSery, addSery,changeTime, getTime } = this.props;
+    const { block_id, series, removeSery, addSery,changeTime, getTime, changeSery } = this.props;
     const start_time = getTime(block_id,"start");
     const stop_time = getTime(block_id,"stop");
     return (
@@ -123,7 +127,7 @@ class Block extends Component {
               onChange={changeTime(block_id,"stop")}
             />
             </td>
-          <td><Series series={series} block_id={block_id} removeSery={removeSery} addSery={addSery} /></td>
+          <td><Series series={series} block_id={block_id} removeSery={removeSery} addSery={addSery} changeSery={changeSery} /></td>
         </tr>
       </tbody></table>
     );
@@ -154,6 +158,7 @@ const DaySchedule = (props) => {
                   addSery={props.addSery}
                   changeTime={props.changeTime}
                   getTime={props.getTime}
+                  changeSery={props.changeSery}
                    />
               </td>
             </tr>
@@ -211,6 +216,26 @@ class Schedule extends Component {
           blocks.map(block_func)
         ])
     });
+  }
+
+  makeSomethingWithSeries=(block_id,series_func)=>{
+    const sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    this.setState({
+      schedule:
+        sc.map(([date, blocks]) => [
+          date,
+          blocks.map(([bl_id,start,stop,series])=>{
+            if (block_id===bl_id){
+              console.log(bl_id,start,stop,series_func(series))
+              return [bl_id,start,stop,series_func(series)];
+            }else{
+              return [bl_id,start,stop,series];
+            }
+          })
+        ])
+    });
+    console.log(this.state.schedule[0]);
   }
 
   removeSery = (block_id, idx) => (e) => {
@@ -309,21 +334,35 @@ class Schedule extends Component {
   }
 
   
-  changeSery = (e)=>{
+  changeSery = (block_id,idx) => (e)=>{
     e.preventDefault();
-    const [field,block_id,idx_str] = e.target.name;
+    const field = e.target.name.split("_")[0];
+    const new_value = e.target.value;
+    // const idx = parseInt(idx_str);
     switch(field){
-      case("type"):
-        ;
+      case("type"):        
+        const change_type = (series)=>series.map(
+          ([series_name,start,stop,type],i) => i===idx ? [series_name,start,stop,new_value]:[series_name,start,stop,type] 
+        );
+        this.makeSomethingWithSeries(block_id,change_type);
         break;
       case("seryName"):
-        ;
+        const change_name = (series)=>series.map(
+          ([series_name,start,stop,type],i) => i===idx ? [new_value,start,stop,type]:[series_name,start,stop,type] 
+        );
+        this.makeSomethingWithSeries(block_id,change_name);
         break;
       case("first"):
-        ;
+        const change_first = (series)=>series.map(
+          ([series_name,start,stop,type],i) => i===idx ? [series_name,new_value,stop,new_value]:[series_name,start,stop,type] 
+        );
+        this.makeSomethingWithSeries(block_id,change_first);
         break;
       case("last"):
-        ;
+        const change_last = (series)=>series.map(
+          ([series_name,start,stop,type],i) => i===idx ? [series_name,start,new_value,type]:[series_name,start,stop,type] 
+        );
+        this.makeSomethingWithSeries(block_id,change_last);
         break;
       default:
         console.log("unknown change");
@@ -366,6 +405,7 @@ class Schedule extends Component {
                     addSery={this.addSery}
                     changeTime={this.changeTime}
                     getTime={this.getTime}
+                    changeSery={this.changeSery}
                   />
                 </td>
               </tr>
