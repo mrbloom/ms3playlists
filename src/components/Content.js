@@ -41,7 +41,7 @@ class Sery extends Component {
     const { idx, type, types, sery_name, series_names, first, last, removeSery, block_id } = this.props;
     return (
 
-      <table onChange={(e)=>console.log(e.target.name)}>
+      <table onChange={(e) => console.log(e.target.name)}>
         <tbody>
           <tr>
             <td>
@@ -104,25 +104,25 @@ const Series = props =>
 class Block extends Component {
   change = (e) => console.log(e.target.name, '=', e.target.value)
   render() {
-    const { block_id, series, removeSery, addSery,changeTime, getTime } = this.props;
-    const start_time = getTime(block_id,"start");
-    const stop_time = getTime(block_id,"stop");
+    const { block_id, series, removeSery, addSery, changeTime, getTime } = this.props;
+    const start_time = getTime(block_id, "start");
+    const stop_time = getTime(block_id, "stop");
     return (
       <table><tbody>
         <tr>
           <td>{block_id}</td>
           <td>
-            <input 
+            <input
               type="time" className="time" name={`${block_id}_start_time`} value={start_time}//defaultValue={start_time}
-              onChange={changeTime(block_id,"start")}
-           />
-           </td>
-          <td>
-            <input 
-              type="time" className="time" name={`${block_id}_stop_time`} value={stop_time}//defaultValue={stop_time}
-              onChange={changeTime(block_id,"stop")}
+              onChange={changeTime(block_id, "start")}
             />
-            </td>
+          </td>
+          <td>
+            <input
+              type="time" className="time" name={`${block_id}_stop_time`} value={stop_time}//defaultValue={stop_time}
+              onChange={changeTime(block_id, "stop")}
+            />
+          </td>
           <td><Series series={series} block_id={block_id} removeSery={removeSery} addSery={addSery} /></td>
         </tr>
       </tbody></table>
@@ -145,16 +145,16 @@ const DaySchedule = (props) => {
                 >-</button>
               </td>
               <td>
-                <Block 
-                  block_id={block[0]} 
-                  start_time={block[1]} 
-                  stop_time={block[2]} 
-                  series={block[3]} 
-                  removeSery={props.removeSery} 
+                <Block
+                  block_id={block[0]}
+                  start_time={block[1]}
+                  stop_time={block[2]}
+                  series={block[3]}
+                  removeSery={props.removeSery}
                   addSery={props.addSery}
                   changeTime={props.changeTime}
                   getTime={props.getTime}
-                   />
+                />
               </td>
             </tr>
           )}
@@ -201,7 +201,7 @@ class Schedule extends Component {
     });//
   }
 
-  makeSomethingWithBlock=(block_func)=>{
+  makeSomethingWithBlock = (block_func) => {
     const sc = this.state.schedule;
     this.prev_schedules.push(sc);
     this.setState({
@@ -272,20 +272,20 @@ class Schedule extends Component {
     }
   }
 
-  getTime = (block_id, time_idx) =>{
-    let some_time=null;
-    this.state.schedule.forEach((day_schedule)=>{
-      day_schedule[1].forEach(block=>{
+  getTime = (block_id, time_idx) => {
+    let some_time = null;
+    this.state.schedule.forEach((day_schedule) => {
+      day_schedule[1].forEach(block => {
         const bl_id = block[0];
-        if (bl_id===block_id){
-          if(time_idx==="start"){
-            console.log("start",block[1]);
+        if (bl_id === block_id) {
+          if (time_idx === "start") {
+            console.log("start", block[1]);
             some_time = block[1];
           }
-          else{
-            some_time = block[2];  
-          } 
-            
+          else {
+            some_time = block[2];
+          }
+
         }
       })
     })
@@ -298,7 +298,7 @@ class Schedule extends Component {
     console.log("chng time", block_id, time_idx, value);
     const chng_time = ([b_id, start, stop, series]) => {
       if (b_id === block_id) {
-        console.log( [b_id, value, time_idx === "start" ? value : start, time_idx === "stop" ? value : stop, series]);
+        console.log([b_id, value, time_idx === "start" ? value : start, time_idx === "stop" ? value : stop, series]);
         return [b_id, time_idx === "start" ? value : start, time_idx === "stop" ? value : stop, series];
       } else {
         return [b_id, start, stop, series];
@@ -308,21 +308,21 @@ class Schedule extends Component {
     console.log(this.state.schedule);
   }
 
-  
-  changeSery = (e)=>{
+
+  changeSery = (e) => {
     e.preventDefault();
-    const [field,block_id,idx_str] = e.target.name;
-    switch(field){
-      case("type"):
+    const [field, block_id, idx_str] = e.target.name;
+    switch (field) {
+      case ("type"):
         ;
         break;
-      case("seryName"):
+      case ("seryName"):
         ;
         break;
-      case("first"):
+      case ("first"):
         ;
         break;
-      case("last"):
+      case ("last"):
         ;
         break;
       default:
@@ -372,6 +372,14 @@ class Schedule extends Component {
             )}
           </tbody>
         </table>
+        <ul>
+          {this.state.schedule.map(([date, blocks]) =>
+            <li key={uid()}>
+              {date}
+              <textarea>{blocks.toString()}</textarea>
+            </li>
+          )}
+        </ul>
       </>
     );
   }
