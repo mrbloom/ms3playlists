@@ -18,6 +18,8 @@ import {
   from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
 
+import { assertSeriesNumber, getFirstLast } from '../stores/SeriesData'
+
 const types = [
   "Розваж.",
   "Власний",
@@ -38,31 +40,43 @@ const uid = () => shortid.generate();
 class Sery extends Component {
 
   render() {
-    const { idx, type, types, sery_name, series_names, first, last, removeSery, block_id } = this.props;
+    const { idx, type, types, sery_name, series_names, first, last, removeSery, block_id, changeSery } = this.props;
+
     return (
 
-      <table onChange={(e) => console.log(e.target.name)}>
+      <table>
         <tbody>
           <tr>
             <td>
-              <select name={`type_${block_id}_${idx}`} defaultValue={type}>
+              <select
+                onChange={changeSery(block_id, idx, 3)}
+                name={`type_${block_id}_${idx}`}
+                defaultValue={type}
+              >
                 {types.map(type =>
                   <option key={type} value={type}>{type}</option>
                 )}
               </select>
             </td>
             <td>
-              <select name={`seryName_${block_id}_${idx}`} defaultValue={sery_name}>
+              <select
+                onChange={changeSery(block_id, idx, 0)}
+                name={`seryName_${block_id}_${idx}`}
+                defaultValue={sery_name}>
                 {series_names.map(sery =>
                   <option key={sery} value={sery}>{sery}</option>
                 )}
               </select>
             </td>
             <td>
-              <input className="number" min="1" name={`first_${block_id}_${idx}`} type="number" defaultValue={first} />
+              <input
+                onChange={changeSery(block_id, idx, 1)}
+                className="number" min="1" name={`first_${block_id}_${idx}`} type="number" defaultValue={first} />
             </td>
             <td>
-              <input className="number" min="1" name={`last_${block_id}_${idx}`} type="number" defaultValue={last} />
+              <input
+                onChange={changeSery(block_id, idx, 2)}
+                className="number" min="1" name={`last_${block_id}_${idx}`} type="number" defaultValue={last} />
             </td>
             <td><button onClick={removeSery(block_id, idx)}>-</button></td>
           </tr>
@@ -87,6 +101,7 @@ const Series = props =>
               series_names={series_names}
               type={sery[3]}
               removeSery={props.removeSery}
+              changeSery={props.changeSery}
             // addSery={props.addSery}
 
             />
@@ -104,7 +119,7 @@ const Series = props =>
 class Block extends Component {
   change = (e) => console.log(e.target.name, '=', e.target.value)
   render() {
-    const { block_id, series, removeSery, addSery, changeTime, getTime } = this.props;
+    const { block_id, series, removeSery, addSery, changeTime, getTime, changeSery } = this.props;
     const start_time = getTime(block_id, "start");
     const stop_time = getTime(block_id, "stop");
     return (
@@ -123,7 +138,7 @@ class Block extends Component {
               onChange={changeTime(block_id, "stop")}
             />
           </td>
-          <td><Series series={series} block_id={block_id} removeSery={removeSery} addSery={addSery} /></td>
+          <td><Series series={series} block_id={block_id} removeSery={removeSery} addSery={addSery} changeSery={changeSery} /></td>
         </tr>
       </tbody></table>
     );
@@ -154,6 +169,7 @@ const DaySchedule = (props) => {
                   addSery={props.addSery}
                   changeTime={props.changeTime}
                   getTime={props.getTime}
+                  changeSery={props.changeSery}
                 />
               </td>
             </tr>
@@ -210,6 +226,23 @@ class Schedule extends Component {
           date,
           blocks.map(block_func)
         ])
+    });
+  }
+
+  makeSomethinWithSery = (block_id, idx, sery_func) => {
+    console.log("mod ser");
+    let sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    sc.forEach(([date, blocks]) => {
+      blocks.forEach(([bl_id, start, stop, series]) => {
+        series.forEach((sery, i) => {
+          if (block_id == bl_id && i == idx)
+            series[i] = sery_func(sery);
+        })
+      })
+    })
+    this.setState({
+      schedule: sc
     });
   }
 
@@ -309,28 +342,27 @@ class Schedule extends Component {
   }
 
 
-  changeSery = (e) => {
+  changeSery = (block_id, idx, type_idx) => (e) => {
     e.preventDefault();
-    const [field, block_id, idx_str] = e.target.name;
-    switch (field) {
-      case ("type"):
-        ;
-        break;
-      case ("seryName"):
-        ;
-        break;
-      case ("first"):
-        ;
-        break;
-      case ("last"):
-        ;
-        break;
-      default:
-        console.log("unknown change");
-        break;
+    const change_sery = (sery) => {
+      let val = e.target.value;
+      let t = sery;
+      console.log(typeof (val));
+      if (type_idx === 1 || type_idx === 2) {
+        val = parseInt(val);
+        if (!assertSeriesNumber(val, sery[0]))
+          return t;
+      }
+      if (type_idx === 0) {
+        [t[1], t[2]] = getFirstLast(val);
+      }
+      t[type_idx] = val;
+      return t;
     }
-    // const idx = names.su
 
+    this.makeSomethinWithSery(block_id, idx, change_sery)
+
+    console.log(e.target.name, e.target.value);
   }
 
   render() {
@@ -366,6 +398,7 @@ class Schedule extends Component {
                     addSery={this.addSery}
                     changeTime={this.changeTime}
                     getTime={this.getTime}
+                    changeSery={this.changeSery}
                   />
                 </td>
               </tr>
@@ -376,7 +409,7 @@ class Schedule extends Component {
           {this.state.schedule.map(([date, blocks]) =>
             <li key={uid()}>
               {date}
-              <textarea>{blocks.toString()}</textarea>
+              <textarea rows="10" cols="150">{blocks.join("\n")}</textarea>
             </li>
           )}
         </ul>
