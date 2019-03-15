@@ -10,6 +10,18 @@ const series_vocabular = {
 const assertSeriesNumber = (value, name, voc = series_vocabular) => (voc[name][1] <= value && value <= voc[name][2]);
 const getFirstLast = (name, voc = series_vocabular) => voc[name].slice(1, 3);
 
+function* range(start, end) {
+    yield start;
+    if (start === end) return;
+    yield* range(start + 1, end);
+}
+
+const getSeriesNames = (name, last, first, len_str = lengthes_str, voc = series_vocabular) => [...range(first, last)].map(i => {
+    const str = `${i.toString().padStart(3, "0")}`//${voc[name]}
+    console.log(str);
+    return str;
+});
+
 const lengthes_str = "prefix;index;duration;\n" +
     "p010137-01-;1;00:23:15;\n" +
     "p010137-01-;2;00:23:44;\n" +
@@ -197,4 +209,4 @@ const lengthes_str = "prefix;index;duration;\n" +
     "p014107-04-;25;00:24:47\n" +
     "p014107-04-;26;00:21:55\n"
 
-export { assertSeriesNumber, getFirstLast };
+export { assertSeriesNumber, getFirstLast, getSeriesNames };

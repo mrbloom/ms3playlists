@@ -18,7 +18,7 @@ import {
   from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
 
-import { assertSeriesNumber, getFirstLast } from '../stores/SeriesData'
+import { assertSeriesNumber, getFirstLast, getSeriesNames } from '../stores/SeriesData'
 
 const types = [
   "Розваж.",
@@ -366,7 +366,7 @@ class Schedule extends Component {
   }
 
   render() {
-    // console.log(dateToString(this.state.week_date));
+    // console.log(getSeriesNames("Помста1", 1, 7));
     return (
       <>
 
@@ -409,7 +409,16 @@ class Schedule extends Component {
           {this.state.schedule.map(([date, blocks]) =>
             <li key={uid()}>
               {date}
-              <textarea rows="10" cols="150">{blocks.join("\n")}</textarea>
+              <textarea rows="10" cols="150">{
+                blocks.map(
+                  block => block
+                  // ([block_id, start, stop, series]) => series.map(
+                  //   sery => getSeriesNames(sery[0], sery[1], sery[2]).map(name =>
+                  //     `${date} ${start}:00;${name};${date} ${stop}:00;;${block_id}`)
+                  // )
+                ).join('\n\n')
+              }
+              </textarea>
             </li>
           )}
         </ul>
