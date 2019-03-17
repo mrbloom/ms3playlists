@@ -1,0 +1,33 @@
+.cell label,input,select {
+    display:block;
+}
+
+.row{
+    display: flex;
+}
+
+/*Iframe styles*/
+iframe{
+    width: 100%;
+    height: 650px;
+}
+
+.iframe-big{
+    width: 100%;
+    height: 600px;
+}
+
+.iframe-midle{
+    width: 100%;
+    height: 500px;
+}
+
+.iframe-small{
+    width: 100%;
+    height: 350px;
+}
+
+dt{
+    font: 1.5em sans-serif;
+}
+/*Iframe styles END*/
