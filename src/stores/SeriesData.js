@@ -1,4 +1,7 @@
 
+// import { Papa } from 'papaparse';
+// import * as Papa from 'papaparse';
+
 const series_vocabular = {
     "Помста1": ["p007289-01-", 1, 21],
     "Помста2": ["p008255-02-", 1, 20],
@@ -15,32 +18,24 @@ function* range(start, end) {
     // for (let i=start;i<end;i+=step){
     //     yield i;
     // }
-        
+
     yield start;
     if (start === end) return;
     yield* range(start + 1, end);
 }
 
-const getNamesOfSeries = (name,  first, last,len_str = lengthes_str, voc = series_vocabular) =>
-{
-    console.log(`name=${name}`)
-    return [...range(first,last)];
-}
+const getNamesOfSeries = (name, first, last, len_str = lengthes_str, voc = series_vocabular) =>
+    [...range(first, last)].map(i => {
+        const str = `${voc[name][0]}${i.toString().padStart(3, "0")}`
+        console.log(str);
+        return str;
+    })
 
-
-// {[...range(first, last)].map(i => {
-    // const str = `${i.toString().padStart(3, "0")}`//${voc[name]}
-    // console.log(str);
-    // return str;
-    // console.log("111111")
-    // console.log("idx===",i,first,last);
-//     return i.toString();
-// })};
 
 
 console.log("dddd");
-const iii=getNamesOfSeries("Помста1",1,4);
-console.log("RES",iii);
+const iii = getNamesOfSeries("Помста1", 1, 4);
+console.log("RES", iii);
 
 const lengthes_str = "prefix;index;duration;\n" +
     "p010137-01-;1;00:23:15;\n" +
@@ -229,4 +224,50 @@ const lengthes_str = "prefix;index;duration;\n" +
     "p014107-04-;25;00:24:47\n" +
     "p014107-04-;26;00:21:55\n"
 
-export { assertSeriesNumber, getFirstLast, getNamesOfSeries };
+let durations = {};
+// let durations_loaded = false;
+// var config_csv = {
+//     download: true,
+//     quotes: false,
+//     quoteChar: '"',
+//     escapeChar: '"',
+//     delimiter: ";",
+//     header: true,
+//     newline: "\r\n",
+//     complete: function (results) {
+//         // durations = results;
+//         for (var key in results.data) {
+//             var record = results.data[key];
+//             durations[record["prefix"] + record["index"].padStart(3, "0")] = record["duration"];
+
+//         }
+//         durations_loaded = true;
+//         // console.log("Parsing complete:", durations);
+//         console.log("Durations loaded")
+//     },
+//     step: function (results, parser) {
+//         console.log("Row data:", results.data);
+//         console.log("Row errors:", results.errors);
+//     },
+//     error: function (e) { console.log(e) }
+// };
+// console.log("start parsing")
+// const res = Papa.parse(lengthes_str, config_csv);
+// console.log("paparse res = ", res);
+
+function csv_parse(csv_string) {
+    var results = {};
+    var lines = csv_string.split('\n');
+    var names = lines[0].split(';').filter(text => text != "");
+    lines.slice(1).forEach((line, i) => {
+        var elements = line.split(';').filter(text => text != "")
+        console.log(i, elements, elements.length);
+        if (elements.length == 3)
+            results[elements[0] + elements[1].padStart(3, "0")] = elements[2];
+    })
+    return results;
+}
+
+durations = csv_parse(lengthes_str);
+
+export { assertSeriesNumber, getFirstLast, getNamesOfSeries, durations };

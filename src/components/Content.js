@@ -5,6 +5,9 @@ import 'rc-time-picker/assets/index.css';
 import './components.css'
 import shortid from 'shortid';
 
+
+
+
 import {
   SeriesStore,
   existy, ua_day,
@@ -18,7 +21,7 @@ import {
   from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
 
-import { assertSeriesNumber, getFirstLast, getNamesOfSeries } from '../stores/SeriesData'
+import { assertSeriesNumber, getFirstLast, getNamesOfSeries, durations } from '../stores/SeriesData'
 
 const types = [
   "Розваж.",
@@ -190,13 +193,7 @@ class Schedule extends Component {
   constructor(props) {
     super(props);
     const today = new Date();
-    const init_schedule = get_week_dates(today).map(date =>
-      [dateToString(date), [
-        [datestrToBlockId(dateToString(date), 1), "20:00", "21:00", [["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-        [datestrToBlockId(dateToString(date), 2), "22:00", "23:00", [["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-        [datestrToBlockId(dateToString(date), 3), "23:00", "03:00", [["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
-      ]],
-    );
+    const init_schedule = this.initSchedule(today)
     this.state = {
       week_date: dateToString(today),
       schedule: init_schedule,
@@ -204,8 +201,23 @@ class Schedule extends Component {
     this.prev_schedules = [init_schedule];
   }
 
+  initSchedule = (today) => get_week_dates(today).map(date =>
+    [dateToString(date), [
+      [datestrToBlockId(dateToString(date), 1), "20:00", "21:00", [["Помста1", 1, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+      [datestrToBlockId(dateToString(date), 2), "22:00", "23:00", [["Помста2", 5, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+      [datestrToBlockId(dateToString(date), 3), "23:00", "03:00", [["Помста3", 7, 12, "Розваж."], ["Помста3", 11, 13, "УКР."]]],
+    ]],
+  );
+
   changeWeekDate = (e) => {
-    this.setState({ week_date: e.target.value });
+    console.log(e.target.value);
+    const dt = e.target.value
+    const sc = this.state.schedule;
+    this.prev_schedules.push(sc);
+    this.setState({
+      week_date: dt,
+      schedule: this.initSchedule(new Date(dt))
+    });
   }
 
   removeSchedule = (idx) => (e) => {
@@ -409,19 +421,22 @@ class Schedule extends Component {
           {this.state.schedule.map(([date, blocks]) =>
             <li key={uid()}>
               {date}
-              <textarea rows="10" cols="150">{
+              <textarea rows="10" cols="150" defaultValue={
                 blocks.map(
-                  ([block_id, start, stop, series]) => series.map( (sery) => {
-                    console.log("hhhh")
-                    console.log(getNamesOfSeries(sery[0],sery[1],sery[2]))
-                    return [sery[0], sery[1], sery[2]]
-                  }).join('\n')
-                  // ([block_id, start, stop, series]) => series.map(
-                  //   sery => getSeriesNames(sery[0], sery[1], sery[2]).map(name =>
-                  //     `${date} ${start}:00;${name};${date} ${stop}:00;;${block_id}`)
-                  // )
-                ).join('\n\n')
-              }
+                  // ([block_id, start, stop, series]) => series.map( (sery) => {
+                  //   console.log("hhhh")
+                  //   console.log(getNamesOfSeries(sery[0],sery[1],sery[2]))
+                  //   return [sery[0], sery[1], sery[2]]
+                  // }).join('\n')
+                  ([block_id, start, stop, series]) => {
+
+                    return series.map(
+                      sery => getNamesOfSeries(sery[0], sery[1], sery[2]).map(name =>
+                        `${date} ${start}:00;${name};${date} ${stop}:00;${durations[name]};${block_id}\r\n`).join(''))
+
+                  }
+                ).join('\r\n\r\n')
+              }>
               </textarea>
             </li>
           )}
