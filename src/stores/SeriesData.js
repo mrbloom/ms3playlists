@@ -1,6 +1,8 @@
+import { dateToBlockId } from "./ScheduleStore";
 
 // import { Papa } from 'papaparse';
 // import * as Papa from 'papaparse';
+
 
 const series_vocabular = {
     "Помста1": ["p007289-01-", 1, 21],
@@ -9,6 +11,21 @@ const series_vocabular = {
     "Помста4": ["p014107-04-", 1, 26],
     "Вечірка": ["s014338-01-", 1, 12],
 }
+
+const ltTVStart = (time, start = "06:00") => {
+    const [hh, mm] = time.split(':').map(parseInt);
+    const [shh, smm] = start.split(':').map(parseInt);
+    const hhmm = new Date(0, 0, 0, hh, mm);
+    const shhmm = new Date(0, 0, 0, shh, smm);
+    return (time <= start);
+}
+
+const nextDate = (date, days = 1) => {
+    let dt = new Date(date);
+    dt.setDate(dt.getDate() + days)
+    return new Date(dt).toISOString().slice(0, 10).replace(/-/g, '.');
+}
+
 
 const assertSeriesNumber = (value, name, voc = series_vocabular) => (voc[name][1] <= value && value <= voc[name][2]);
 const getFirstLast = (name, voc = series_vocabular) => voc[name].slice(1, 3);
@@ -270,4 +287,4 @@ function csv_parse(csv_string) {
 
 durations = csv_parse(lengthes_str);
 
-export { assertSeriesNumber, getFirstLast, getNamesOfSeries, durations };
+export { assertSeriesNumber, getFirstLast, getNamesOfSeries, durations, nextDate, ltTVStart };

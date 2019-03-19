@@ -21,7 +21,7 @@ import {
   from '../stores/ScheduleStore'
 import { Col, Row } from 'react-bootstrap';
 
-import { assertSeriesNumber, getFirstLast, getNamesOfSeries, durations } from '../stores/SeriesData'
+import { assertSeriesNumber, getFirstLast, getNamesOfSeries, durations, nextDate, ltTVStart } from '../stores/SeriesData'
 
 const types = [
   "Розваж.",
@@ -431,8 +431,12 @@ class Schedule extends Component {
                   ([block_id, start, stop, series]) => {
 
                     return series.map(
-                      sery => getNamesOfSeries(sery[0], sery[1], sery[2]).map(name =>
-                        `${date} ${start}:00;${name};${date} ${stop}:00;${durations[name]};${block_id}\r\n`).join(''))
+                      sery => getNamesOfSeries(sery[0], sery[1], sery[2]).map((name) => {
+                        // const () stop_date
+                        const start_date = date.replace(/-/g, '.');
+                        const stop_date = (ltTVStart(stop)) ? nextDate(date) : date;
+                        return `${date} ${start}:00;${name};${stop_date} ${stop}:00;${durations[name]};${block_id}\r\n`
+                      }).join(''))
 
                   }
                 ).join('\r\n\r\n')
