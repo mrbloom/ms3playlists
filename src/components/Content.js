@@ -432,11 +432,10 @@ class Schedule extends Component {
 
                     return series.map(
                       sery => getNamesOfSeries(sery[0], sery[1], sery[2]).map((name) => {
-                        // const () stop_date
-                        const start_date = date.replace(/-/g, '.');
-                        const stop_date = (ltTVStart(stop)) ? nextDate(date) : date;
-                        return `${date} ${start}:00;${name};${stop_date} ${stop}:00;${durations[name]};${block_id}\r\n`
-                      }).join(''))
+                        const dotted_date = date.replace(/-/g, '.');
+                        const stop_date = (ltTVStart(stop)) ? nextDate(date) : dotted_date;
+                        return `${dotted_date} ${start}:00;${name};${stop_date} ${stop}:00;${durations[name]};${block_id}\r\n`
+                      }).join('')).join('')
 
                   }
                 ).join('\r\n\r\n')
